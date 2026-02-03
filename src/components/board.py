@@ -1,7 +1,5 @@
 from pygame import Rect, draw, Surface, Font, font
-import os
 
-fontPath = os.path.join('../assets', 'JetBrainsMono-Regular.ttf')
 OFFSET = 15 # for the board's border
 
 # function to draw each individual squares
@@ -63,11 +61,11 @@ def boardSurface(squareSize = 30) -> Surface:
     board = Surface((boardSize, boardSize)).convert()
     board.fill(colors["background"])
 
-    fonts = font.SysFont('Agency FB', 12, bold = False)
+    fonts = font.Font("assets/AGENCYR.ttf", 13)
     
     for row in range(8):
         _drawBoard(row, squareSize, board, colors)
-        _drawRanks(row, board, squareSize, fonts, colors["font"])
+        _drawRanks(row, board, squareSize, fonts, colors['font'])
         _drawFiles(board, squareSize, fonts, colors['font'])
         
     return board
