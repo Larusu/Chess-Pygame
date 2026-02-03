@@ -1,5 +1,5 @@
 import pygame
-from .components.board import boardSurface
+from .board import boardSurface
 
 MAXHEIGHT = 700
 MAXWIDTH = 850

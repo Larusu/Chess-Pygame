@@ -61,7 +61,7 @@ def boardSurface(squareSize = 30) -> Surface:
     board = Surface((boardSize, boardSize)).convert()
     board.fill(colors["background"])
 
-    fonts = font.Font("assets/AGENCYR.ttf", 13)
+    fonts = font.Font("Chess-Pygame/assets/AGENCYR.ttf", 13)
     
     for row in range(8):
         _drawBoard(row, squareSize, board, colors)

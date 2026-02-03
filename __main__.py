@@ -1,4 +1,4 @@
-from .game import run
+from .engine.game import run
 
 def main():
     run()
