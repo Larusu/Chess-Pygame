@@ -1,6 +1,10 @@
 from pygame import Rect, draw, Surface, Font, font
+from ..utils.utilities import getFontPath
 
 OFFSET = 15 # for the board's border
+
+def _isWhite(x, y) -> bool:
+    return (x % 2 == 0 and y % 2 == 0) or (x % 2 == 1 and y % 2 == 1)
 
 # function to draw each individual squares
 def _drawSquare(col, board, square, squareSize, color):
@@ -8,21 +12,20 @@ def _drawSquare(col, board, square, squareSize, color):
     draw.rect(board, color, square)
 
 # function to draw the board, aside the ranks and files
-def _drawBoard(row, squareSize, board, colors: dict):
+def _drawBoard(squareSize, board, colors: dict, fonts: Font):
     square = Rect(OFFSET, OFFSET, squareSize, squareSize)
 
-    if row >= 1: square.bottom = ( (row + 1) * squareSize ) + OFFSET # go to next row
+    for row in range(8):
+        if row >= 1: square.bottom = ( (row + 1) * squareSize ) + OFFSET # go to next row
     
-    for col in range(8):
-        if(row == 0 or row % 2 == 0) and col % 2 == 0:
-            _drawSquare(col, board, square, squareSize, colors['white'])
-        elif(row == 1 or row % 2 == 1) and col % 2 == 1:
-            _drawSquare(col, board, square, squareSize, colors['white'])
-
-        if(row == 0 or row % 2 == 0) and col % 2 == 1:
-            _drawSquare(col, board, square, squareSize, colors['black'])
-        elif(row == 1 or row % 2 == 1) and col % 2 == 0:
-            _drawSquare(col, board, square, squareSize, colors['black'])
+        for col in range(8):
+            if _isWhite(row, col):
+                _drawSquare(col, board, square, squareSize, colors['white'])
+            else:
+                _drawSquare(col, board, square, squareSize, colors['black'])
+                
+            _drawRanks(row, board, squareSize, fonts, colors['font'])
+            _drawFiles(board, squareSize, fonts, colors['font'])
     
 # function to draw ranks (1, 2, 3, 4, 5, 6, 7, 8)
 def _drawRanks(row, board : Surface, squareSize, font : Font, color):
@@ -61,11 +64,9 @@ def boardSurface(squareSize = 30) -> Surface:
     board = Surface((boardSize, boardSize)).convert()
     board.fill(colors["background"])
 
-    fonts = font.Font("Chess-Pygame/assets/AGENCYR.ttf", 13)
+    fontPath = getFontPath("AGENCYR.ttf")
+    fonts = font.Font(fontPath, 13)
     
-    for row in range(8):
-        _drawBoard(row, squareSize, board, colors)
-        _drawRanks(row, board, squareSize, fonts, colors['font'])
-        _drawFiles(board, squareSize, fonts, colors['font'])
+    _drawBoard(squareSize, board, colors, fonts)
         
     return board

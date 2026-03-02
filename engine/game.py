@@ -1,8 +1,9 @@
 import pygame
 from .board import boardSurface
+from .piece import Pawn
 
-MAXHEIGHT = 700
-MAXWIDTH = 850
+MAXHEIGHT = 555
+MAXWIDTH = 555
 BACKGROUNDCOLOR = (48, 46, 43)
 
 def run():
@@ -17,6 +18,9 @@ def run():
     screen.blit(background, (0, 0))
     pygame.display.flip()
 
+    wPawn = Pawn(100, 100, True)
+    allSprites = pygame.sprite.Group((wPawn))
+
     clock = pygame.Clock()
     running = True
 
@@ -29,8 +33,14 @@ def run():
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 running = False
 
+        board = boardSurface(squareSize = 65)
+
+        allSprites.update()
+
         screen.blit(background, (0, 0))
-        screen.blit(boardSurface(squareSize = 50), (10, 10))
+        screen.blit(board, (0, 0))
+        allSprites.draw(screen)
+
         pygame.display.flip()
 
     pygame.quit()
