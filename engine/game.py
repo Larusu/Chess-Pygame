@@ -1,25 +1,32 @@
 import pygame
-from .board import boardSurface
-from .piece import Pawn
+from .board import board_surface
+from ..config.config import BOARD_SIZE, BACKGROUND_COLOR
 
-MAXHEIGHT = 555
-MAXWIDTH = 555
-BACKGROUNDCOLOR = (48, 46, 43)
+MAX_HEIGHT = BOARD_SIZE
+MAX_WIDTH = BOARD_SIZE
 
 def run():
     pygame.init()
-    screen = pygame.display.set_mode((MAXWIDTH, MAXHEIGHT), pygame.SCALED)
+
+    screen = pygame.display.set_mode(
+        (MAX_WIDTH, MAX_HEIGHT),
+        pygame.SCALED
+    )
+
     pygame.display.set_caption("Chess")
     pygame.mouse.set_visible(True)
 
     background = pygame.Surface(screen.get_size()).convert()
-    background.fill(BACKGROUNDCOLOR)
-    
+    background.fill(BACKGROUND_COLOR)
+
     screen.blit(background, (0, 0))
     pygame.display.flip()
 
-    wPawn = Pawn(100, 100, True)
-    allSprites = pygame.sprite.Group((wPawn))
+    # Create board once
+    board = board_surface()
+
+    # w_pawn = Pawn(100, 100, True)
+    # all_sprites = pygame.sprite.Group(w_pawn)
 
     clock = pygame.Clock()
     running = True
@@ -28,18 +35,21 @@ def run():
         clock.tick(60)
 
         for event in pygame.event.get():
+
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+
+            elif (
+                event.type == pygame.KEYDOWN
+                and event.key == pygame.K_ESCAPE
+            ):
                 running = False
 
-        board = boardSurface(squareSize = 65)
-
-        allSprites.update()
+        # all_sprites.update()
 
         screen.blit(background, (0, 0))
         screen.blit(board, (0, 0))
-        allSprites.draw(screen)
+        # all_sprites.draw(screen)
 
         pygame.display.flip()
 

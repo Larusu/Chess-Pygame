@@ -1,1 +1,1 @@
-from .utilities import loadImage, getFontPath
+from .utilities import load_image, get_font_path

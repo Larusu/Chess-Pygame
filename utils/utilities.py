@@ -1,17 +1,20 @@
 import pygame
-from pathlib import Path 
+from pathlib import Path
 
-assetsDir = Path(__file__).parent.parent.absolute() / 'assets'
+assets_dir = Path(__file__).parent.parent.absolute() / "assets"
 
-def loadImage(file, scale = 1):
-    imageFile = assetsDir.joinpath("images", file)
-    image = pygame.image.load(imageFile)
 
-    size = image.get_size()
-    size = (size[0] * scale, size[1] * scale)
+def load_image(file, scale=1):
+    image_file = assets_dir.joinpath("images", file)
+    image = pygame.image.load(image_file)
+
+    width, height = image.get_size()
+    size = (int(width * scale), int(height * scale))
+
     image = pygame.transform.scale(image, size)
 
     return image, image.get_rect()
 
-def getFontPath(file):
-    return assetsDir.joinpath("font", file)
+
+def get_font_path(file):
+    return assets_dir.joinpath("font", file)
