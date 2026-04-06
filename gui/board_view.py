@@ -12,12 +12,6 @@ def _is_white(x, y) -> bool:
     # Pattern: alternating colors like a chessboard
     return (x + y) % 2 == 0
 
-# function to draw each individual square
-def _draw_square(col, board, square,  color):
-    # Set the horizontal (X) position of the square
-    square.left = (col * square_size) + OFFSET
-    draw.rect(board, color, square)
-
 # function to draw the board, aside the ranks and files
 def _draw_board(board, fonts):
     width = height = square_size
@@ -33,9 +27,9 @@ def _draw_board(board, fonts):
             )
 
             if _is_white(col, row):
-                _draw_square(col, board, square, board_colors["white"])
+                draw.rect(board, board_colors["white"], square)
             else:
-                _draw_square(col, board, square, board_colors["black"])
+                draw.rect(board, board_colors["black"], square)
 
         _draw_ranks(row, board, fonts)
 
