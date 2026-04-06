@@ -1,20 +1,21 @@
+# piece.py is an interface class
+from abc import ABC, abstractmethod
 import pygame
-from ..utils.utilities import load_image
 
-class Piece:
-    def __init__():
-        
-        alive = True
-    
-    def move():
+class Piece(pygame.sprite.Sprite, ABC):
+    def __init__(self, color, position):
+        super().__init__()
+        self.image, self.rect = self.load_piece_image(color)
+        self.rect.topleft = position
+
+    @abstractmethod
+    def available_moves(self):
         pass
 
-class Pawn(pygame.sprite.Sprite): 
-    white : bool
+    @abstractmethod
+    def available_takes(self):
+        pass
 
-    # next task is assign the x and y coordinates of the pieces
-    def __init__(self, x, y, white = True):
-        pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_image("wP.png") if (white) else load_image("bP.png")
-        self.rect.x = x
-        self.rect.y = y
+    @abstractmethod
+    def load_piece_image(self, color):
+        pass

@@ -1,5 +1,5 @@
 import pygame
-from .board import board_surface
+from .board_view import board_surface
 from ..config.config import BOARD_SIZE, BACKGROUND_COLOR
 
 MAX_HEIGHT = BOARD_SIZE
