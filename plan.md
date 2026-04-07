@@ -1,6 +1,7 @@
 # chess-pygame-plan
 
 ## Plan:
+
 ### `pieces/`
 - This is where I'll put all the move logics for piece class
 - The white and black is not here
@@ -28,6 +29,46 @@
 #### `config.py`
 -  all the configurations for the game
 - `BOARD_SIZE`, `SQUARE_SIZE`, `BOARD_COLORS`, `BACKGROUND_COLOR`
+
+## Pieces Movement
+
+### Pawn
+Equation: (x, y ± 1 || 2)
+- If white: (x, y + 1) or (x, y + 2)
+- If black: (x, y - 1) or (x, y - 2)
+Condition: (1 <= x <= 8,  1 <= y <= 8)
+### Rook
+![[how-rook-move.png]]
+Equation: (x, y ± n) and (x ± n, y)
+- Top:    (x, y + n)
+- Right:  (x + n, y)
+- Bottom: (x, y - n)
+- Left:   (x - n, y)
+Condition: (1 <= x <= 8,  1 <= y <= 8)
+### Bishop
+![[how-bishop-move.png]]
+Equation: (x ± n, y ± n)
+- Top-right: (x + n, y + n)
+- Top-left:  (x - n, y + n)
+- Bot-right: (x + n, y - n)
+- Bot-left:  (x - n, y - n)
+Condition: (1 <= x <= 8,  1 <= y <= 8)
+### Knight
+![[how-knight-move.png]]
+Equation: (x ± 2, y ± 1), (x ± 1, y ± 2)
+- Top-right:  (x + 1, y + 2)
+- Top-left:   (x - 1, y + 2)
+- Right-up:   (x + 2, y + 1)
+- Right-down: (x + 2, y - 1)
+- Bot-right:  (x + 1, y - 2)
+- Bot-left:   (x - 1, y - 2)
+- Left-up:    (x - 2, y + 1)
+- Left-down:  (x - 2, y - 1)
+Condition: (1 <= x <= 8,  1 <= y <= 8)
+### Queen
+Same as Rook and Bishop
+
+## File Structure
 
 ```
 chess/
