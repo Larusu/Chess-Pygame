@@ -17,7 +17,40 @@
 - Board state (where is every piece?)
 #### `board.py`
 - this should handle the data structures
-- Where are the pieces?
+- We will FEN / Forsyth-Edwards Notations
+1. Piece Placement
+	- lowercase for black : prnbqk
+	- UPPERCASE for white : PRNBQK
+	- empty squares are denoted by numbers 1-8
+	- Starting piece looks like : =="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"==
+2. Active Color
+	- who moves next
+	- always in lowercase : w if white turn or b for black
+	- exampls : =="8/8/8/4p1K1/2k1P3/8/8/8 b"== (black's turn)
+3. Castling Rights
+	- can castle and what side
+	- Uppercase for white first, means available to castle
+	- then lowercase for black
+	- k: kingside castle, q: queenside castle. -: neither can castle
+	- example: =="4k2r/6r1/8/8/8/8/3R4/R3K3 w Qk"== 
+		- *white can castle queen side, while black can castle kingside*
+	- example: =="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq"==
+		- *both can castle on kingside and queenside*
+4. Possible En Passant targets
+	- if pawn moves 2 squares is possible en passant capture
+	- if can en passant capture: use algebraic notation (e4, f4, c5, f5)
+	- if cannot: the symbol used is `-`
+	- example: =="rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3"==
+5. Half-move Clock
+	- how many moves player has made since the last pawn advance or piece capture
+	- this is for the **50-move draw rule**
+	- if counter reach 100 (means both players reached 50 moves), the game ends in a draw
+	- example: =="8/5k2/3p4/1p1Pp2p/pP2Pp1P/P4P1K/8/8 b - - 99"==
+		- *The fifth field of this string tells us that this game ends in a draw on the next move.*
+6. Full-move Number
+	- last field is to count the move of both player
+	- it is ONLY INCREMENTED if black moves
+	- example: =="5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b - - 1 32"==
 #### `rules.py`
 - This is where all the rule happens
 - `checkmate`, `stalemate`, `is_in_check`
