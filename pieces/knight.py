@@ -12,8 +12,8 @@ class Knight(Piece):
     def available_takes(self):
         pass
 
-    def load_piece_image(self, color):
-        if color == "white":
+    def load_piece_image(self):
+        if self.color == "white":
             return load_image("wN.png")
         else:
             return load_image("bN.png")

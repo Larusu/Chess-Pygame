@@ -1,7 +1,6 @@
 # chess-pygame-plan
 
 ## Plan:
-
 ### `pieces/`
 - This is where I'll put all the move logics for piece class
 - The white and black is not here
@@ -56,21 +55,24 @@
 - `checkmate`, `stalemate`, `is_in_check`
 
 ### `gui/` 
-- Draw the board and pieces 
+- The graphical interface that will show the player
 - The game loop
 - Event handling: mouse click and drag-and-drop
+#### `board_view.py`
+- Draw the board and pieces 
+- reads the FEN Notation and show it to the graphical interface
 #### `config.py`
 -  all the configurations for the game
 - `BOARD_SIZE`, `SQUARE_SIZE`, `BOARD_COLORS`, `BACKGROUND_COLOR`
 
 ## Pieces Movement
 
-### Pawn
+### Pawn - P
 Equation: (x, y ± 1 || 2)
 - If white: (x, y + 1) or (x, y + 2)
 - If black: (x, y - 1) or (x, y - 2)
 Condition: (1 <= x <= 8,  1 <= y <= 8)
-### Rook
+### Rook - R
 ![[how-rook-move.png]]
 Equation: (x, y ± n) and (x ± n, y)
 - Top:    (x, y + n)
@@ -78,7 +80,7 @@ Equation: (x, y ± n) and (x ± n, y)
 - Bottom: (x, y - n)
 - Left:   (x - n, y)
 Condition: (1 <= x <= 8,  1 <= y <= 8)
-### Bishop
+### Bishop - B
 ![[how-bishop-move.png]]
 Equation: (x ± n, y ± n)
 - Top-right: (x + n, y + n)
@@ -86,7 +88,7 @@ Equation: (x ± n, y ± n)
 - Bot-right: (x + n, y - n)
 - Bot-left:  (x - n, y - n)
 Condition: (1 <= x <= 8,  1 <= y <= 8)
-### Knight
+### Knight - N
 ![[how-knight-move.png]]
 Equation: (x ± 2, y ± 1), (x ± 1, y ± 2)
 - Top-right:  (x + 1, y + 2)
@@ -98,7 +100,7 @@ Equation: (x ± 2, y ± 1), (x ± 1, y ± 2)
 - Left-up:    (x - 2, y + 1)
 - Left-down:  (x - 2, y - 1)
 Condition: (1 <= x <= 8,  1 <= y <= 8)
-### Queen
+### Queen - Q
 Same as Rook and Bishop
 
 ## File Structure
@@ -140,10 +142,10 @@ chess/
 Finished at 4/7/2026;02:38
 
 ## Phase 2 — Piece Rendering
-- [ ] Load and display all piece images on the board
-- [ ] Map board squares to pixel coordinates
-- [ ] Place all pieces in their starting positions
-
+- [x] Load and display all piece images on the board
+- [x] Map board squares to pixel coordinates
+- [x] Place all pieces in their starting positions
+Finished at 4/9/2026;02:45
 ## Phase 3 — Mouse Input & Selection
 - [ ] Detect which square the user clicks
 - [ ] Highlight the selected piece
