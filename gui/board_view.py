@@ -1,6 +1,7 @@
 from pygame import Rect, draw, Surface, font
 from ..utils.utilities import get_font_path
 from .config import SQUARE_SIZE, OFFSET, BOARD_COLORS
+from ..engine.board import Board
 
 # Global settings pulled from config
 offset = OFFSET              # margin/border around the board
