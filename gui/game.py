@@ -1,5 +1,5 @@
 import pygame
-from .board_view import board_surface
+from .board_view import BoardView 
 from .config import BOARD_SIZE, BACKGROUND_COLOR
 
 MAX_HEIGHT = BOARD_SIZE
@@ -23,7 +23,8 @@ def run():
     pygame.display.flip()
 
     # Create board once
-    board = board_surface()
+    board_view = BoardView()
+    board = board_view.board_surface()
 
     # w_pawn = Pawn(100, 100, True)
     # all_sprites = pygame.sprite.Group(w_pawn)
