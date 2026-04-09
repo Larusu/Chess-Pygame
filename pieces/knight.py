@@ -3,9 +3,12 @@ from ..utils.utilities import load_image
 import pygame
 
 class Knight(Piece):
-    def __init__(self, color, position):
-        super().__init__(color, position)
-
+    def __init__(self, color):
+        super().__init__(color)
+    
+    def set_position(self, position):
+        self.rect.topleft = position
+    
     def available_moves(self):
         pass
 

@@ -1,3 +1,4 @@
+from .piece import Piece
 from .pawn import Pawn
 from .rook import Rook
 from .knight import Knight

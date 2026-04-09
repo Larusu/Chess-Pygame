@@ -3,12 +3,17 @@ from abc import ABC, abstractmethod
 import pygame
 
 class Piece(pygame.sprite.Sprite, ABC):
-    def __init__(self, color, position):
+    def __init__(self, color):
         super().__init__()
         self.color = color
-        self.position = position
-        # self.image, self.rect = self.load_piece_image()
-        # self.rect.topleft = position
+        self.image, self.rect = self.load_piece_image()
+
+    def draw(self, screen):
+       screen.blit(self.image, self.rect) 
+    
+    @abstractmethod
+    def set_position(self, position):
+        pass
 
     @abstractmethod
     def available_moves(self):

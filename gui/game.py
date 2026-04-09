@@ -24,7 +24,8 @@ def run():
 
     # Create board once
     board_view = BoardView()
-    board = board_view.board_surface()
+    board = board_view.draw_board()
+    piece = board_view.draw_piece()
 
     # w_pawn = Pawn(100, 100, True)
     # all_sprites = pygame.sprite.Group(w_pawn)
@@ -50,6 +51,7 @@ def run():
 
         screen.blit(background, (0, 0))
         screen.blit(board, (0, 0))
+        screen.blit(piece, (0, 0))
         # all_sprites.draw(screen)
 
         pygame.display.flip()
