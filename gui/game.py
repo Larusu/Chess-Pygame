@@ -25,10 +25,6 @@ def run():
     # Create board once
     board_view = BoardView()
     board = board_view.draw_board()
-    piece = board_view.draw_piece()
-
-    # w_pawn = Pawn(100, 100, True)
-    # all_sprites = pygame.sprite.Group(w_pawn)
 
     clock = pygame.Clock()
     running = True
@@ -47,12 +43,9 @@ def run():
             ):
                 running = False
 
-        # all_sprites.update()
-
         screen.blit(background, (0, 0))
         screen.blit(board, (0, 0))
-        screen.blit(piece, (0, 0))
-        # all_sprites.draw(screen)
+        screen.blit(board_view.draw_piece(), (0, 0))
 
         pygame.display.flip()
 
