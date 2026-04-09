@@ -9,12 +9,15 @@ class Piece(pygame.sprite.Sprite, ABC):
         self.image, self.rect = self.load_piece_image()
 
     def draw(self, screen):
-       screen.blit(self.image, self.rect) 
+       screen.blit(self.image, self.rect)
+
+    def set_position(self, position):
+        self.rect.topleft = position
     
     @abstractmethod
-    def set_position(self, position):
+    def update(self):
         pass
-
+    
     @abstractmethod
     def available_moves(self):
         pass

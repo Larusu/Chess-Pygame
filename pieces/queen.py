@@ -5,10 +5,10 @@ import pygame
 class Queen(Piece):
     def __init__(self, color):
         super().__init__(color)
-
-    def set_position(self, position):
-        self.rect.topleft = position
-
+    
+    def update(self):
+        pass
+    
     def available_moves(self):
         pass
 

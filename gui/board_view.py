@@ -1,4 +1,4 @@
-from pygame import Rect, draw, Surface, font, SRCALPHA
+from pygame import Rect, draw, Surface, font, SRCALPHA, sprite
 from ..utils.utilities import get_font_path
 from .config import SQUARE_SIZE, OFFSET, BOARD_COLORS
 from ..engine.board import Board
@@ -20,30 +20,49 @@ class BoardView:
         self.board_surface.fill(self.board_colors["background"])
         self.font_path = get_font_path("AGENCYR.TTF")
         self.font_size = 15
-    
+        self.x_rect_pos = [(i * self.square_size) + self.offset for i in range(8)]
+        self.y_rect_pos = [(i * self.square_size) + self.offset for i in range(8)]
+
     # function to be called in the game
     def draw_board(self) -> Surface:
-        self._draw_board()
+        width = height = self.square_size
+
+        for row in range(8):
+            for col in range(8):
+                square = Rect(self.x_rect_pos[col], self.y_rect_pos[row], width, height)
+
+                if self._is_white(col, row):
+                    draw.rect(self.board_surface, self.board_colors["white"], square)
+                else:
+                    draw.rect(self.board_surface, self.board_colors["black"], square)
+
+            self._draw_ranks(row)
+
+        self._draw_files()
         return self.board_surface
 
     def draw_piece(self) -> Surface:
         transparent_bg = Surface((self.size_of_board, self.size_of_board), SRCALPHA).convert_alpha() 
         transparent_bg.fill((0,0,0,0))
-
+        all_sprites = sprite.Group()
+        
         for row in range(8):
             for col in range(8):
-                x_pos = (col * self.square_size) + self.offset
-                y_pos = (row * self.square_size) + self.offset   
-                self._draw_piece(transparent_bg, row, col, (x_pos, y_pos))
+                piece = self._valid_piece(row, col) 
+                if piece is None: continue
+                all_sprites.add(piece)
+        
+        all_sprites.update()
+        all_sprites.draw(transparent_bg)
         return transparent_bg
 
     # private functions
-    def _draw_piece(self, surface, row, col, position):
+    def _valid_piece(self, row, col):
         piece = self.board_state.get_board(row, col)
-
         if piece is not None:
-            piece.set_position(position)
-            piece.draw(surface)
+            piece.set_position((self.x_rect_pos[col], self.y_rect_pos[row]))
+            return piece
+        return None
     
     def _is_white(self, x, y) -> bool:
         return (x + y) % 2 == 0
@@ -78,26 +97,4 @@ class BoardView:
             file_pos = file.get_rect(x = x_pos, y = y_pos)
 
             self.board_surface.blit(file, file_pos)
-
-    # function to draw the board, aside the ranks and files
-    def _draw_board(self):
-        width = height = self.square_size
-
-        for row in range(8):
-            for col in range(8):
-                x_pos = (col * self.square_size) + self.offset
-                y_pos = (row * self.square_size) + self.offset   
-
-                # Create a NEW square for each position (row, col)
-                square = Rect(x_pos, y_pos, width, height)
-
-                if self._is_white(col, row):
-                    draw.rect(self.board_surface, self.board_colors["white"], square)
-                else:
-                    draw.rect(self.board_surface, self.board_colors["black"], square)
-
-            self._draw_ranks(row)
-
-        self._draw_files()
-
 
