@@ -7,7 +7,7 @@ from ..pieces.piece import Piece
 class BoardView:
     def __init__(self):
         # Instantiate
-        self.board_state = Board("5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b - - 1 32")
+        self.board_state = Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b - - 1 32")
 
         # Global settings pulled from config
         self.offset = OFFSET              # margin/border around the board
@@ -23,10 +23,50 @@ class BoardView:
         self.x_rect_pos = [(i * self.square_size) + self.offset for i in range(8)]
         self.y_rect_pos = [(i * self.square_size) + self.offset for i in range(8)]
 
-    # function to be called in the game
+        # pygame vars 
+        self.pieces = sprite.Group() # only initialize once
+        self.selected_piece = None
+
+    """
+    DRAWING ONLY 
+    """
+    # FOR PIECES
+    def draw_piece(self) -> Surface:
+        self.overlay = Surface((self.size_of_board, self.size_of_board), SRCALPHA).convert_alpha() 
+        self.overlay.fill((0,0,0,0))
+        
+        self.pieces.empty() # to avoid multiple sprites being created
+
+        for row in range(8):
+            for col in range(8):
+                piece = self._valid_piece(row, col)
+                if piece is None: continue
+                self.pieces.add(piece)
+       
+        # highlight should be drawn before the pieces B)
+        if self.selected_piece:
+            self._highlight_square(self.selected_piece)
+
+        self.pieces.update()
+        self.pieces.draw(self.overlay)
+
+        return self.overlay 
+
+    def _valid_piece(self, row, col):
+        piece = self.board_state.get_board(row, col)
+        if piece is not None:
+            piece.set_position((self.x_rect_pos[col], self.y_rect_pos[row]))
+            return piece
+
+        return None
+
+    def _highlight_square(self, piece):
+        rect = Rect(piece.rect.x, piece.rect.y, self.square_size, self.square_size)
+        draw.rect(self.overlay, self.board_colors["highlight"], rect)
+    
+    # FOR BOARD
     def draw_board(self) -> Surface:
         width = height = self.square_size
-
         for row in range(8):
             for col in range(8):
                 square = Rect(self.x_rect_pos[col], self.y_rect_pos[row], width, height)
@@ -39,34 +79,12 @@ class BoardView:
             self._draw_ranks(row)
 
         self._draw_files()
+
         return self.board_surface
-
-    def draw_piece(self) -> Surface:
-        transparent_bg = Surface((self.size_of_board, self.size_of_board), SRCALPHA).convert_alpha() 
-        transparent_bg.fill((0,0,0,0))
-        all_sprites = sprite.Group()
-        
-        for row in range(8):
-            for col in range(8):
-                piece = self._valid_piece(row, col) 
-                if piece is None: continue
-                all_sprites.add(piece)
-        
-        all_sprites.update()
-        all_sprites.draw(transparent_bg)
-        return transparent_bg
-
-    # private functions
-    def _valid_piece(self, row, col):
-        piece = self.board_state.get_board(row, col)
-        if piece is not None:
-            piece.set_position((self.x_rect_pos[col], self.y_rect_pos[row]))
-            return piece
-        return None
     
     def _is_white(self, x, y) -> bool:
         return (x + y) % 2 == 0
-    
+
     # function to draw ranks (1–8)
     def _draw_ranks(self, row):
         board_size = self.board_surface.get_width()
@@ -81,7 +99,7 @@ class BoardView:
         rank_pos = rank.get_rect(x = x_pos, y = y_pos)
 
         self.board_surface.blit(rank, rank_pos)
-
+    
     # function to draw files (a–h)
     def _draw_files(self):
         board_size = self.board_surface.get_height()
@@ -97,4 +115,14 @@ class BoardView:
             file_pos = file.get_rect(x = x_pos, y = y_pos)
 
             self.board_surface.blit(file, file_pos)
+
+    """
+    FOR HANDLING MOVES
+    """
+    def handle_click(self, mouse_pos):
+        for piece in self.pieces:
+            if piece.rect.collidepoint(mouse_pos):
+                self.selected_piece = piece
+
+
 

@@ -37,11 +37,13 @@ def run():
             if event.type == pygame.QUIT:
                 running = False
 
-            elif (
-                event.type == pygame.KEYDOWN
-                and event.key == pygame.K_ESCAPE
-            ):
+            elif (event.type == pygame.KEYDOWN
+                and event.key == pygame.K_ESCAPE):
                 running = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    board_view.handle_click(event.pos)
 
         screen.blit(background, (0, 0))
         screen.blit(board, (0, 0))

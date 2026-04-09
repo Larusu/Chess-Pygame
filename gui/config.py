@@ -21,5 +21,6 @@ BOARD_COLORS = {
     "background": (49, 46, 43),
     "black": (118,150,86),
     "white": (238,238,210),
+    "highlight": (255,255,0,80), # 4th value is for transparency
     "font": (255, 255, 255),
 }
