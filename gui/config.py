@@ -21,6 +21,7 @@ BOARD_COLORS = {
     "background": (49, 46, 43),
     "black": (118,150,86),
     "white": (238,238,210),
-    "highlight": (255,255,0,80), # 4th value is for transparency
+    "selected": (255,255,0,80),  # for left click
+    "annotation": (255,0,0,100), # for right click
     "font": (255, 255, 255),
 }

@@ -20,12 +20,14 @@ class BoardView:
         self.board_surface.fill(self.board_colors["background"])
         self.font_path = get_font_path("AGENCYR.TTF")
         self.font_size = 15
-        self.x_rect_pos = [(i * self.square_size) + self.offset for i in range(8)]
-        self.y_rect_pos = [(i * self.square_size) + self.offset for i in range(8)]
+        self.squares = [[None for _ in range(8)] for _ in range(8)]
+        self._set_squares() # for self.squares
 
         # pygame vars 
         self.pieces = sprite.Group() # only initialize once
-        self.selected_piece = None
+        self.selected_piece = None  # fpr left click
+        self.annotation = None      # for right click
+        self.annotation_list = []   # to store the annotation
 
     """
     DRAWING ONLY 
@@ -44,8 +46,8 @@ class BoardView:
                 self.pieces.add(piece)
        
         # highlight should be drawn before the pieces B)
-        if self.selected_piece:
-            self._highlight_square(self.selected_piece)
+        if self.selected_piece or self.annotation:
+            self._highlight_square()
 
         self.pieces.update()
         self.pieces.draw(self.overlay)
@@ -55,35 +57,37 @@ class BoardView:
     def _valid_piece(self, row, col):
         piece = self.board_state.get_board(row, col)
         if piece is not None:
-            piece.set_position((self.x_rect_pos[col], self.y_rect_pos[row]))
+            piece.set_position((self.squares[row][col].x,
+                               self.squares[row][col].y))
             return piece
 
         return None
 
-    def _highlight_square(self, piece):
-        rect = Rect(piece.rect.x, piece.rect.y, self.square_size, self.square_size)
-        draw.rect(self.overlay, self.board_colors["highlight"], rect)
+    def _highlight_square(self):
+        if self.selected_piece:
+            square = self.selected_piece.rect
+            square.size = (self.square_size, self.square_size)
+            draw.rect(self.overlay, self.board_colors["selected"], square)
+        elif self.annotation:
+            for square in self.annotation_list:
+                draw.rect(self.overlay, self.board_colors["annotation"], square)
     
     # FOR BOARD
     def draw_board(self) -> Surface:
-        width = height = self.square_size
         for row in range(8):
             for col in range(8):
-                square = Rect(self.x_rect_pos[col], self.y_rect_pos[row], width, height)
-
-                if self._is_white(col, row):
-                    draw.rect(self.board_surface, self.board_colors["white"], square)
-                else:
-                    draw.rect(self.board_surface, self.board_colors["black"], square)
-
+                color = self._square_color(col, row)
+                draw.rect(self.board_surface, self.board_colors[color], self.squares[row][col])
             self._draw_ranks(row)
-
         self._draw_files()
 
         return self.board_surface
     
-    def _is_white(self, x, y) -> bool:
-        return (x + y) % 2 == 0
+    def _square_color(self, x, y) -> str:
+        if (x + y) % 2 == 0:
+            return "white"
+        else:
+            return "black"
 
     # function to draw ranks (1–8)
     def _draw_ranks(self, row):
@@ -119,10 +123,44 @@ class BoardView:
     """
     FOR HANDLING MOVES
     """
-    def handle_click(self, mouse_pos):
+    def handle_left_click(self, mouse_pos):
+        # make sure to remove all the annotation first
+        self.annotation = None 
+        self.annotation_list.clear()
+
         for piece in self.pieces:
             if piece.rect.collidepoint(mouse_pos):
                 self.selected_piece = piece
+                return # early return for memory efficiency
+        
+        self.selected_piece = None
+
+    def handle_right_click(self, mouse_pos):
+        for row in range(8):
+            for col in range(8):
+                if self.squares[row][col].collidepoint(mouse_pos):
+                    # make sure to unhighlight the selected_piece first
+                    self.selected_piece = None                     
+                    self.annotation = self.squares[row][col]
+                    self._check_annotation()
+                    return # memory efficiency
+
+    def _check_annotation(self):
+        if self.annotation in self.annotation_list:
+            self.annotation_list.remove(self.annotation)
+        else:
+            self.annotation_list.append(self.annotation)
+
+    """
+    HELPER FUNCTION
+    """
+    def _set_squares(self):
+        for row in range(8):
+            for col in range(8):
+                x_pos = (col * self.square_size) + self.offset
+                y_pos = (row * self.square_size) + self.offset
+                rect = Rect(x_pos, y_pos, self.square_size, self.square_size)
+                self.squares[row][col] = rect
 
 
 
