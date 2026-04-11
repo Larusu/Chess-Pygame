@@ -79,8 +79,7 @@ class BoardView:
 
     def _highlight_square(self, surface):
         if self.highlight:
-            square = self.highlight.rect
-            square.size = (self.square_size, self.square_size)
+            square = self.highlight
             draw.rect(surface, self.board_colors["selected"], square)
         elif self.annotation:
             for square in self.annotation_list:
@@ -136,28 +135,31 @@ class BoardView:
 
         for piece in self.pieces:
             if piece.rect.collidepoint(mouse_pos):
-                if piece.rect in self.squares:
-                    pass
-                    # in theory kapag yung square nung piece ay parehas sa squares 
-                    # yung squares nalang yung iassign sa self.highlight 
-
                 self.selected_piece = piece
-                self.highlight = piece
+
+                # for highlight
+                x, y = self._get_square_pos((piece.rect.x, piece.rect.y))
+                self.highlight = self.squares[x][y]
                 break
             else: 
                 self.selected_piece = None
 
     def handle_right_click(self, mouse_pos):
+        position = self._get_square_pos(mouse_pos)
+
+        if position is not None:
+            self.selected_piece = None
+            self.annotation = self.squares[position[0]][position[1]]
+            self._assign_annotation()
+
+    def _get_square_pos(self, position):
         for row in range(8):
             for col in range(8):
-                if self.squares[row][col].collidepoint(mouse_pos):
-                    # make sure to unhighlight the selected_piece first
-                    self.selected_piece = None                     
-                    self.annotation = self.squares[row][col]
-                    self._check_annotation()
-                    return # memory efficiency
+                if self.squares[row][col].collidepoint(position):
+                    return row, col
+        return None
 
-    def _check_annotation(self):
+    def _assign_annotation(self):
         if self.annotation in self.annotation_list:
             self.annotation_list.remove(self.annotation)
         else:
@@ -165,6 +167,7 @@ class BoardView:
 
     def deselect_piece(self):
         self.selected_piece = None
+        self.highlight = None
 
     def move_piece(self, position):
         if self.selected_piece:
