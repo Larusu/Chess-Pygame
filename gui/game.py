@@ -33,7 +33,6 @@ def run():
         clock.tick(60)
 
         for event in pygame.event.get():
-
             if event.type == pygame.QUIT:
                 running = False
 
@@ -44,8 +43,17 @@ def run():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     board_view.handle_left_click(event.pos)
+                    print(event)
+                    # board_view.move_piece(event.pos) 
                 elif event.button == 3:
                     board_view.handle_right_click(event.pos)
+            
+            if event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:
+                    board_view.deselect_piece()
+
+            if event.type == pygame.MOUSEMOTION:
+                board_view.move_piece(event.pos) 
 
         screen.blit(background, (0, 0))
         screen.blit(board, (0, 0))
