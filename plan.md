@@ -146,10 +146,12 @@ Finished at 4/7/2026;02:38
 - [x] Map board squares to pixel coordinates
 - [x] Place all pieces in their starting positions
 Finished at 4/9/2026;02:45
+
 ## Phase 3 — Mouse Input & Selection
-- [ ] Detect which square the user clicks
-- [ ] Highlight the selected piece
-- [ ] Show available moves for the selected piece
+- [x] Detect which square the user clicks
+- [x] Highlight the selected piece
+- [x] Show available moves for the selected piece
+Finished at 4/12/2026;21:00
 
 ## Phase 4 — Movement
 - [ ] Implement basic move logic per piece
