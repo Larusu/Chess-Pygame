@@ -25,7 +25,9 @@ class BoardView:
         self.highlight = None
         self.annotation = None      # for right click
         self.annotation_list = []   # to store the annotation
-        
+        self.move = False
+        self.scaled_moves = 0 
+
         # iniatilize variables
         self._set_squares()
         self._set_pieces()
@@ -81,9 +83,20 @@ class BoardView:
         if self.highlight:
             square = self.highlight
             draw.rect(surface, self.board_colors["selected"], square)
+            self._possible_moves(surface)    
         elif self.annotation:
             for square in self.annotation_list:
                 draw.rect(surface, self.board_colors["annotation"], square)
+    
+    def _possible_moves(self, surface):
+        for x, y in self.scaled_moves:
+            x_pos = ((x * SQUARE_SIZE) + OFFSET) + int(self.square_size / 2)
+            y_pos = ((y * SQUARE_SIZE) + OFFSET) + int(self.square_size / 2)
+            circle_size = 9
+            draw.circle(surface, 
+                        self.board_colors["circles"], 
+                        (x_pos, y_pos),
+                        circle_size)
     
     # FOR BOARD
     def draw_board(self) -> Surface:
@@ -100,7 +113,7 @@ class BoardView:
                         self.board_colors[color], 
                         self.squares[row][col])
             
-            # draw the ranks (numbers) 
+            # draw the ranks (numbers)
             x_pos = board.get_width() - (self.offset - 5)
             y_pos = self.offset + ((row + 0.4) * self.square_size)
             text = str(8 - row)
@@ -129,52 +142,87 @@ class BoardView:
     FOR HANDLING MOVES
     """
     def handle_left_click(self, mouse_pos):
-        # make sure to remove all the annotation first
-        self.annotation = None 
+         # clear right-click annotations
+        self.annotation = None
         self.annotation_list.clear()
+    
+        clicked_square = self._get_square_by_pos(mouse_pos)
 
+        if clicked_square is None:
+            return
+        
+        target_pos = self._get_coords_by_square(clicked_square)
+        
+        # CASE 1: if there is piece already selected
+        if self.selected_piece:
+            if target_pos in self.scaled_moves:
+                self.selected_piece.on_move(
+                        clicked_square.center,
+                        self.board_state
+                        )
+
+        # CASE 2: no piece selected yet or select another piece
         for piece in self.pieces:
             if piece.rect.collidepoint(mouse_pos):
                 self.selected_piece = piece
 
                 # for highlight
-                x, y = self._get_square_pos((piece.rect.x, piece.rect.y))
-                self.highlight = self.squares[x][y]
-                break
-            else: 
-                self.selected_piece = None
+                square = self._get_square_by_pos(
+                        (piece.rect.x, piece.rect.y))
+                
+                # assign availables moves
+                self.scaled_moves = \
+                        self.selected_piece.generate_directional_moves()
+                
+                self.highlight = square
+                return
+
+        # otherwise, cancel selection
+        self.selected_piece = None
+        self.highlight = None
+        self.scaled_moves = None
 
     def handle_right_click(self, mouse_pos):
-        position = self._get_square_pos(mouse_pos)
+        square = self._get_square_by_pos(mouse_pos)
 
-        if position is not None:
-            self.selected_piece = None
-            self.annotation = self.squares[position[0]][position[1]]
-            self._assign_annotation()
+        if square is None:
+            return
 
-    def _get_square_pos(self, position):
-        for row in range(8):
-            for col in range(8):
-                if self.squares[row][col].collidepoint(position):
-                    return row, col
-        return None
-
-    def _assign_annotation(self):
-        if self.annotation in self.annotation_list:
+        self.selected_piece = None
+        self.annotation = square 
+        
+        if square in self.annotation_list:
             self.annotation_list.remove(self.annotation)
         else:
             self.annotation_list.append(self.annotation)
 
-    def deselect_piece(self):
+    def _get_square_by_pos(self, position):
+        for row in range(8):
+            for col in range(8):
+                if self.squares[row][col].collidepoint(position):
+                    return self.squares[row][col]
+        return None
+
+    def _get_coords_by_square(self, square):
+        for row in range(8):
+            for col in range(8):
+                if self.squares[row][col] == square:
+                    return (col, row)
+        return None
+    
+    def handle_mouse_up(self):
+        if self.move:
+            self.selected_piece.on_move(
+                    self.selected_piece.rect.center,
+                    self.board_state)
+            self.move = False
         self.selected_piece = None
-        self.highlight = None
 
     def move_piece(self, position):
         if self.selected_piece:
             self.selected_piece.rect.center = position
-        # dapat visually move muna yung piece to square 
-        # check kung saang square pasok
-        # tsaka mo na i set_position for that piece
+            self.move = True
+        
 
 
 

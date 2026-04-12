@@ -2,7 +2,7 @@
 # Board Dimensions
 # =========================
 
-SQUARE_SIZE = 65
+SQUARE_SIZE = 60
 OFFSET = 15
 
 BOARD_SIZE = (SQUARE_SIZE * 8) + (OFFSET * 2)
@@ -23,5 +23,6 @@ BOARD_COLORS = {
     "white": (238,238,210),
     "selected": (255,255,0,80),  # for left click
     "annotation": (255,0,0,100), # for right click
+    "circles": (192,192,192,80), # for the possibles moves
     "font": (255, 255, 255),
 }

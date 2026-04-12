@@ -43,14 +43,13 @@ def run():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     board_view.handle_left_click(event.pos)
-                    print(event)
                     # board_view.move_piece(event.pos) 
                 elif event.button == 3:
                     board_view.handle_right_click(event.pos)
             
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
-                    board_view.deselect_piece()
+                    board_view.handle_mouse_up()
 
             if event.type == pygame.MOUSEMOTION:
                 board_view.move_piece(event.pos) 
