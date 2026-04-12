@@ -1,6 +1,5 @@
 from .piece import Piece
 from ..utils.utilities import load_image
-import pygame
 
 class Bishop(Piece):
     def __init__(self, color):
@@ -9,8 +8,8 @@ class Bishop(Piece):
     def update(self):
         pass
 
-    def available_moves(self):
-        pass
+    def get_coordinates(self) -> list:
+        return [(1, 1), (1, -1), (-1, 1), (-1, -1)]
 
     def available_takes(self):
         pass

@@ -1,6 +1,5 @@
 from .piece import Piece
 from ..utils.utilities import load_image
-import pygame
 
 class Rook(Piece):
     def __init__(self, color):
@@ -9,8 +8,8 @@ class Rook(Piece):
     def update(self):
         pass
 
-    def available_moves(self):
-        pass
+    def get_coordinates(self) -> list:
+        return [(1, 0), (-1, 0), (0, 1), (0, -1)]
 
     def available_takes(self):
         pass
