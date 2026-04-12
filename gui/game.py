@@ -52,7 +52,8 @@ def run():
                     board_view.handle_mouse_up()
 
             if event.type == pygame.MOUSEMOTION:
-                board_view.move_piece(event.pos) 
+                if event.buttons[0]:
+                    board_view.move_piece(event.pos) 
 
         screen.blit(background, (0, 0))
         screen.blit(board, (0, 0))

@@ -25,7 +25,7 @@ class BoardView:
         self.highlight = None
         self.annotation = None      # for right click
         self.annotation_list = []   # to store the annotation
-        self.move = False
+        self.drag = False
         self.scaled_moves = 0 
 
         # iniatilize variables
@@ -160,6 +160,10 @@ class BoardView:
                         clicked_square.center,
                         self.board_state
                         )
+                self.selected_piece = None
+                self.highlight = None
+                self.scaled_moves = None
+                return
 
         # CASE 2: no piece selected yet or select another piece
         for piece in self.pieces:
@@ -211,17 +215,19 @@ class BoardView:
         return None
     
     def handle_mouse_up(self):
-        if self.move:
+        if self.drag:
             self.selected_piece.on_move(
                     self.selected_piece.rect.center,
                     self.board_state)
-            self.move = False
-        self.selected_piece = None
+            self.drag = False
+            self.scaled_moves = False
+            self.highlight = False
+            self.selected_piece = None
 
     def move_piece(self, position):
         if self.selected_piece:
             self.selected_piece.rect.center = position
-            self.move = True
+            self.drag = True
         
 
 
