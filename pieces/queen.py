@@ -2,8 +2,8 @@ from .piece import Piece
 from ..utils.utilities import load_image
 
 class Queen(Piece):
-    def __init__(self, color):
-        super().__init__(color)
+    def __init__(self, color, x, y):
+        super().__init__(color, x, y)
     
     def update(self):
         pass

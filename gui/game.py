@@ -53,7 +53,7 @@ def run():
 
             if event.type == pygame.MOUSEMOTION:
                 if event.buttons[0]:
-                    board_view.move_piece(event.pos) 
+                    board_view.handle_dragging(event.pos) 
 
         screen.blit(background, (0, 0))
         screen.blit(board, (0, 0))

@@ -1,12 +1,12 @@
 from pygame import Rect, draw, Surface, font, SRCALPHA, sprite
 from ..utils.utilities import get_font_path
+from ..engine.game_state import GameState
 from .config import SQUARE_SIZE, OFFSET, BOARD_COLORS
-from ..engine.board import Board
 
 class BoardView:
     def __init__(self):
         # Instantiate
-        self.board_state = Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b - - 1 32")
+        self.board_state = GameState() 
 
         # Global settings pulled from config
         self.offset = OFFSET              # margin/border around the board
@@ -26,7 +26,7 @@ class BoardView:
         self.annotation = None      # for right click
         self.annotation_list = []   # to store the annotation
         self.drag = False
-        self.scaled_moves = 0 
+        self.available_moves: list = []
 
         # iniatilize variables
         self._set_squares()
@@ -44,61 +44,20 @@ class BoardView:
         self.pieces = sprite.Group()
         for row in range(8):
             for col in range(8):
-                piece = self._valid_piece(row, col)
+                piece = self.board_state.get_board_by_position(row, col)
                 
                 if piece is None: 
                     continue
+
+                piece.set_position((self.squares[row][col].x,
+                                    self.squares[row][col].y))
 
                 self.pieces.add(piece)
 
     """
     DRAWING ONLY 
     """
-    # FOR PIECES
-    def _valid_piece(self, row, col):
-        piece = self.board_state.get_board(row, col)
-        if piece is not None:
-            piece.set_position((self.squares[row][col].x,
-                               self.squares[row][col].y))
-            return piece
-
-        return None
-
-    def draw_piece(self) -> Surface:
-        overlay = Surface(
-                (self.size_of_board, self.size_of_board), 
-                SRCALPHA).convert_alpha() 
-        overlay.fill((0,0,0,0))
-        
-        # highlight should be drawn before the pieces B)
-        if self.highlight or self.annotation:
-            self._highlight_square(overlay)
-
-        self.pieces.update()
-        self.pieces.draw(overlay)
-
-        return overlay 
-
-    def _highlight_square(self, surface):
-        if self.highlight:
-            square = self.highlight
-            draw.rect(surface, self.board_colors["selected"], square)
-            self._possible_moves(surface)    
-        elif self.annotation:
-            for square in self.annotation_list:
-                draw.rect(surface, self.board_colors["annotation"], square)
-    
-    def _possible_moves(self, surface):
-        for x, y in self.scaled_moves:
-            x_pos = ((x * SQUARE_SIZE) + OFFSET) + int(self.square_size / 2)
-            y_pos = ((y * SQUARE_SIZE) + OFFSET) + int(self.square_size / 2)
-            circle_size = 9
-            draw.circle(surface, 
-                        self.board_colors["circles"], 
-                        (x_pos, y_pos),
-                        circle_size)
-    
-    # FOR BOARD
+    # first layer
     def draw_board(self) -> Surface:
         board = Surface((self.size_of_board, self.size_of_board)).convert()
         board.fill(self.board_colors["background"])
@@ -138,6 +97,41 @@ class BoardView:
         else:
             return "black"
 
+    # Second Layer
+    def draw_piece(self) -> Surface:
+        overlay = Surface(
+                (self.size_of_board, self.size_of_board), 
+                SRCALPHA).convert_alpha() 
+        overlay.fill((0,0,0,0))
+        
+        # highlight should be drawn before the pieces B)
+        if self.highlight or self.annotation:
+            self._highlight_square(overlay)
+
+        self.pieces.update()
+        self.pieces.draw(overlay)
+
+        return overlay 
+
+    def _highlight_square(self, surface):
+        if self.highlight:
+            square = self.highlight
+            draw.rect(surface, self.board_colors["selected"], square)
+            self._possible_moves(surface)    
+        elif self.annotation:
+            for square in self.annotation_list:
+                draw.rect(surface, self.board_colors["annotation"], square)
+    
+    def _possible_moves(self, surface):
+        for x, y in self.available_moves:
+            x_pos = ((x * SQUARE_SIZE) + OFFSET) + int(self.square_size / 2)
+            y_pos = ((y * SQUARE_SIZE) + OFFSET) + int(self.square_size / 2)
+            circle_size = 9
+            draw.circle(surface, 
+                        self.board_colors["circles"], 
+                        (x_pos, y_pos),
+                        circle_size)
+    
     """
     FOR HANDLING MOVES
     """
@@ -151,55 +145,80 @@ class BoardView:
         if clicked_square is None:
             return
         
-        target_pos = self._get_coords_by_square(clicked_square)
-        
         # CASE 1: if there is piece already selected
         if self.selected_piece:
-            if target_pos in self.scaled_moves:
-                self.selected_piece.on_move(
-                        clicked_square.center,
-                        self.board_state
-                        )
-                self.selected_piece = None
-                self.highlight = None
-                self.scaled_moves = None
-                return
+            self._handle_piece_movement(clicked_square)
+            return
 
         # CASE 2: no piece selected yet or select another piece
         for piece in self.pieces:
             if piece.rect.collidepoint(mouse_pos):
+                self.board_state.set_selected_piece(piece)
                 self.selected_piece = piece
+                self.old_position = piece.rect.x, piece.rect.y
 
-                # for highlight
                 square = self._get_square_by_pos(
                         (piece.rect.x, piece.rect.y))
-                
-                # assign availables moves
-                self.scaled_moves = \
-                        self.selected_piece.generate_directional_moves()
-                
                 self.highlight = square
+                
+                self.available_moves = \
+                        self.board_state.get_available_moves()
                 return
 
         # otherwise, cancel selection
         self.selected_piece = None
         self.highlight = None
-        self.scaled_moves = None
+        self.available_moves = []
 
     def handle_right_click(self, mouse_pos):
-        square = self._get_square_by_pos(mouse_pos)
+        clicked_square = self._get_square_by_pos(mouse_pos)
 
-        if square is None:
+        if clicked_square is None:
             return
 
         self.selected_piece = None
-        self.annotation = square 
+        self.annotation = clicked_square 
         
-        if square in self.annotation_list:
+        if clicked_square in self.annotation_list:
             self.annotation_list.remove(self.annotation)
         else:
             self.annotation_list.append(self.annotation)
 
+    def handle_mouse_up(self):
+        if self.drag:
+            clicked_square = \
+            self._get_square_by_pos(self.selected_piece.rect.center)
+            
+            if clicked_square is None:
+                self.selected_piece.set_position(self.old_position)  # snap back
+                self.drag = False
+                return
+            
+            self._handle_piece_movement(clicked_square)
+            self.drag = False
+
+    def handle_dragging(self, position):
+        if self.selected_piece:
+            self.selected_piece.rect.center = position
+            self.drag = True
+
+    def _handle_piece_movement(self, clicked_square):
+        target_pos = self._get_coords_by_square(clicked_square)
+
+        print(target_pos)
+        print(self.available_moves)
+
+        if target_pos in self.available_moves:
+            self.board_state.move_piece(clicked_square.topleft)
+        else:
+            self.selected_piece.set_position(self.old_position)
+        self.selected_piece = None
+        self.highlight = None
+        self.available_moves = []
+   
+    """
+    HELPER FUNCTIONS
+    """
     def _get_square_by_pos(self, position):
         for row in range(8):
             for col in range(8):
@@ -214,22 +233,6 @@ class BoardView:
                     return (col, row)
         return None
     
-    def handle_mouse_up(self):
-        if self.drag:
-            self.selected_piece.on_move(
-                    self.selected_piece.rect.center,
-                    self.board_state)
-            self.drag = False
-            self.scaled_moves = False
-            self.highlight = False
-            self.selected_piece = None
-
-    def move_piece(self, position):
-        if self.selected_piece:
-            self.selected_piece.rect.center = position
-            self.drag = True
         
-
-
 
 
