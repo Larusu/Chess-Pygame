@@ -11,15 +11,15 @@ class Pawn(Piece):
         pass   
     
     def get_coordinates(self) -> list:
-        # first turn
-        if self.move_count <= 1:
+        # first move
+        if not self.has_move():
             if self.color == "white":
                 return [(0, -1), (1, -1), 
                         (-1, -1), (0, -2)]
             else:
                 return [(0, 1), (1, 1),
                         (-1, 1), (0, 2)]
-        # second, third, ...nth, turn
+        # second, third, ...nth, move
         else:
             if self.color == "white":
                 return [(0, -1), (1, -1), (-1, -1)]

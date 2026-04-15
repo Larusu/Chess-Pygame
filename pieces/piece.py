@@ -10,7 +10,7 @@ class Piece(pygame.sprite.Sprite, ABC):
         self.file = x        # board x-position (0-7) = (a-h)
         self.rank = y        # board y-position (0-7) = (1-8)
         self.max_step = 7    # how long piece can move to board
-        self.move_count = 1  # tracks piece movement
+        self.move_count = 0  # tracks piece movement
 
     def draw(self, screen):
        screen.blit(self.image, self.rect)
@@ -20,10 +20,6 @@ class Piece(pygame.sprite.Sprite, ABC):
     
     @abstractmethod
     def update(self):
-        pass
-    
-    @abstractmethod
-    def get_coordinates(self) -> list:
         pass
 
     def _handle_move_calculation(self, x, y) -> list:
@@ -52,10 +48,21 @@ class Piece(pygame.sprite.Sprite, ABC):
 
         return possible_moves
         
-    def move(self, new_x, new_y):
+    def move(self, new_position, new_file, new_rank):
+        self.set_position(new_position)
         self.move_count += 1
-        self.file, self.rank = new_x, new_y
+        self.file, self.rank = new_file, new_rank
+
+    def has_move(self) -> bool:
+        return self.move_count > 0
+     
+    @abstractmethod
+    def get_coordinates(self) -> list:
+        pass   
     
+    def get_board_position(self) -> tuple[int, int]:
+        return (self.file, self.rank)
+
     def get_color(self):
         return self.color
 

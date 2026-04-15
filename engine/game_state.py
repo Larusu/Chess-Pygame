@@ -1,11 +1,14 @@
 from .board import Board
 from ..pieces.piece import Piece
+from ..pieces.pawn import Pawn
+from ..pieces.king import King
+from ..pieces.rook import Rook
 from .rules import get_valid_moves, get_enemy_at
 
 class GameState:
     def __init__(self):
         # later, fen_str should be from a json or somewhere
-        self.fen_str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 1 32"
+        self.fen_str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
         self.piece_placement, self.active_color, self.castling_rights, \
         self.possible_en_passant, self.half_move, self.full_move \
         = self.fen_str.split(" ")
@@ -14,7 +17,9 @@ class GameState:
         self.board = Board(self.piece_placement)
 
         self.selected_piece: Piece | None = None
-        self.old_position : tuple = ()
+        self.old_rect_pos : tuple = ()
+        self.old_board_pos : tuple = ()
+        self.move_count = 1
 
     # =======================
     # BOARD RELATED FUNCTIONS
@@ -28,7 +33,8 @@ class GameState:
     def set_selected_piece(self, piece):
         self.selected_piece = piece
         self.valid_moves = get_valid_moves(piece, self.board)
-        self.old_position = (piece.rect.x, piece.rect.y)
+        self.old_rect_pos = (piece.rect.x, piece.rect.y)
+        self.old_board_pos = (piece.file, piece.rank)
     
     def get_available_moves(self) -> list: 
         return self.valid_moves
@@ -40,29 +46,31 @@ class GameState:
 
         # if invalid move
         if coords not in self.valid_moves:
-            self.selected_piece.set_position(self.old_position)
+            self.selected_piece.set_position(self.old_rect_pos)
             return "invalid"
         
         x_coord, y_coord = coords
         
-        target_piece = get_enemy_at(self.selected_piece, self.board, 
+        enemy_piece = get_enemy_at(self.selected_piece, self.board, 
                                     y_coord, x_coord)
 
-        if target_piece is not None:
-            target_piece.kill() # remove from sprites
+        if enemy_piece is not None:
+            enemy_piece.kill() # remove from sprites
 
         # set new position
         self.board.update_board(self.selected_piece, y_coord, x_coord)
-        self.selected_piece.move(x_coord, y_coord)
-        self.selected_piece.set_position(new_position)
-
-        # change color
-        next_color = "b" if self.selected_piece.color == "white" else "w"
-        self.active_color = next_color
+        self.selected_piece.move(new_position, x_coord, y_coord)
+        
+        self._update_fen_after_move()
 
         self.selected_piece = None
-        self.old_position = ()
+        self.old_rect_pos = ()
+        self.old_board_pos = ()
+        self.w_king_moved = self.b_king_moved = False
 
+    # =======================
+    # ACCESSORS AND MUTATORS
+    # =======================
     def get_active_color(self) -> str:
         if self.active_color == "w":
             return "white"
@@ -83,3 +91,72 @@ class GameState:
 
     def get_full_move(self):
         return self.full_move
+
+    # =======================
+    # PRIVATE FUNCTIONS
+    # =======================
+    def _update_fen_after_move(self):
+        if self.selected_piece is None:
+            return
+
+        piece_placement: str = self.board.generate_fen_placement()         
+        piece = self.selected_piece
+        own_color = piece.get_color()
+
+        # change color and count full move
+        if own_color == "white":
+            self.active_color = "b"
+        elif own_color == "black":
+            self.active_color = "w"
+            self.full_move = int(self.full_move) + 1
+        
+        # handle en passant and 50-move rule
+        if isinstance(piece, Pawn):
+            self.half_move = 0
+
+            if abs(self.selected_piece.rank - self.old_board_pos[1]) == 2:
+                self.possible_en_passant = self._to_algebraic(piece)
+        else:
+            self.half_move = int(self.half_move) + 1
+
+        # check for possible castle
+        if isinstance(piece, King):
+            castling_fen = self.castling_rights
+            if own_color == "white":
+                self.castling_rights = castling_fen.replace("KQ", "")
+            elif own_color == "black":
+                self.castling_rights = castling_fen.replace("kq", "")
+
+        if isinstance(piece, Rook):
+            castling_fen = self.castling_rights
+            if self.old_board_pos == (7, 0):
+                self.castling_rights = castling_fen.replace("Q", "")
+            elif self.old_board_pos == (7, 7):
+                self.castling_rights = castling_fen.replace("K", "")
+            elif self.old_board_pos == (0, 7):
+                self.castling_rights = castling_fen.replace("k", "")
+            elif self.old_board_pos == (0, 0):
+                self.castling_rights = castling_fen.replace("q", "")
+
+        if len(self.castling_rights) == 0:
+            self.castling_rights = "-"
+
+        self.fen_str = piece_placement + " " + self.active_color + " "
+        self.fen_str += self.castling_rights + " " + self.possible_en_passant
+        self.fen_str += " " + str(self.half_move) + " " + str(self.full_move)
+
+    def _to_algebraic(self, piece: Piece) -> str:
+        file, rank = piece.get_board_position()
+        
+        file_map = {
+            0: "a", 1: "b", 2: "c", 3: "d",
+            4: "e", 5: "f", 6: "g", 7: "h",
+        }
+        rank_number = 8 - rank
+
+        if piece.get_color() == "white":
+            return f"{file_map[file]}{rank_number}"
+        elif piece.get_color() == "black":
+            return f"{file_map[file]}{rank_number}"
+        else:
+            return "-"
