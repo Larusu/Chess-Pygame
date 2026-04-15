@@ -1,11 +1,11 @@
 from .board import Board
 from ..pieces.piece import Piece
-from .rules import get_valid_moves
+from .rules import get_valid_moves, get_enemy_at
 
 class GameState:
     def __init__(self):
         # later, fen_str should be from a json or somewhere
-        self.fen_str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b - - 1 32"
+        self.fen_str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 1 32"
         self.piece_placement, self.active_color, self.castling_rights, \
         self.possible_en_passant, self.half_move, self.full_move \
         = self.fen_str.split(" ")
@@ -14,7 +14,7 @@ class GameState:
         self.board = Board(self.piece_placement)
 
         self.selected_piece: Piece | None = None
-        self.current_pos: tuple = ()
+        self.old_position : tuple = ()
 
     # =======================
     # BOARD RELATED FUNCTIONS
@@ -27,15 +27,41 @@ class GameState:
     # =======================
     def set_selected_piece(self, piece):
         self.selected_piece = piece
+        self.valid_moves = get_valid_moves(piece, self.board)
+        self.old_position = (piece.rect.x, piece.rect.y)
     
     def get_available_moves(self) -> list: 
-        return get_valid_moves(self.selected_piece, self.board)
+        return self.valid_moves
 
-    def move_piece(self, position):
-        self.selected_piece.move(position)
-        self.board.new_board_position(self.selected_piece) 
+    def move_piece(self, new_position, coords):
+        if self.selected_piece is None:
+            return
+
+        # if invalid
+        if coords not in self.valid_moves:
+            print("wrong position")
+            self.selected_piece.set_position(self.old_position)
+            return
+        
+        x_coord, y_coord = coords
+        
+        target_piece = get_enemy_at(self.selected_piece, self.board, 
+                                    y_coord, x_coord)
+
+        if target_piece is not None:
+            target_piece.kill() # remove from sprites
+
+        # set new position
+        self.board.update_board(self.selected_piece, y_coord, x_coord)
+        self.selected_piece.move(x_coord, y_coord)
+        self.selected_piece.set_position(new_position)
+
+        # change color
+        next_color = "b" if self.selected_piece.color == "white" else "w"
+        self.active_color = next_color
+
         self.selected_piece = None
-        self.current_pos = ()
+        self.old_position = ()
 
     def get_active_color(self) -> str:
         if self.active_color == "w":

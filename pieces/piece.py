@@ -1,7 +1,6 @@
 # piece.py is an interface class
 import pygame
 from abc import ABC, abstractmethod
-from ..gui.config import SQUARE_SIZE, OFFSET
 
 class Piece(pygame.sprite.Sprite, ABC):
     def __init__(self, color, x, y):
@@ -18,7 +17,6 @@ class Piece(pygame.sprite.Sprite, ABC):
 
     def set_position(self, position):
         self.rect.topleft = position
-        self.current_x, self.current_y = position
     
     @abstractmethod
     def update(self):
@@ -54,24 +52,9 @@ class Piece(pygame.sprite.Sprite, ABC):
 
         return possible_moves
         
-    def move(self, new_pos):
-        move_paths = self.generate_possible_moves()
-
-        for direction in move_paths:
-            for x, y in direction:
-                rect = pygame.Rect((x * SQUARE_SIZE) + OFFSET,
-                                   (y * SQUARE_SIZE) + OFFSET,
-                                   SQUARE_SIZE,
-                                   SQUARE_SIZE)
-
-                if rect.collidepoint(new_pos):
-                    self.move_count += 1
-                    self.file, self.rank = x, y
-                    self.set_position((rect.x, rect.y))
-                    return
-
-        # if move is invalid, set to old position
-        self.set_position((self.current_x, self.current_y)) 
+    def move(self, new_x, new_y):
+        self.move_count += 1
+        self.file, self.rank = new_x, new_y
     
     def get_color(self):
         return self.color

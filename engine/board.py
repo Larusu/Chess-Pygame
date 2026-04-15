@@ -42,17 +42,11 @@ class Board:
         for index, rank in enumerate(ranks):
             self._assign_piece(rank, index)
     
-    def new_board_position(self, piece: Piece):
-        target_row, target_col = piece.rank, piece.file
+    def update_board(self, piece: Piece, target_row: int, target_col: int):
+        old_row, old_col = piece.rank, piece.file
         
-        for row in range(8):
-            for col in range(8):
-                if self.board[row][col] == piece:
-                    # remove to old position
-                    self.board[row][col] = None
-                    # set new position
-                    self.board[target_row][target_col] = piece
-                    return
+        self.board[old_row][old_col] = None
+        self.board[target_row][target_col] = piece
 
-    def get_piece_by_pos(self, row, col) -> Piece:
+    def get_piece_by_pos(self, row, col) -> Piece | None:
          return self.board[row][col]

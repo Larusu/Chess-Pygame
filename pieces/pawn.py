@@ -12,14 +12,16 @@ class Pawn(Piece):
     def get_coordinates(self) -> list:
         if self.move_count > 1:
             if self.color == "white":
-                return [(0, -1)]
+                return [(0, -1), (1, -1), (-1, -1)]
             elif self.color == "black":
-                return [(0, 1)]
-        elif self.move_count == 1:
+                return [(0, 1), (1, 1), (-1, 1)]
+        elif self.move_count <= 1:
             if self.color == "white":
-                return [(0, -1), (0, -2)]
+                return [(0, -1), (1, -1), 
+                        (-1, -1), (0, -2)]
             elif self.color == "black":
-                return [(0, 1), (0, 2)]
+                return [(0, 1), (1, 1),
+                        (-1, 1), (0, 2)]
         else: 
             return []
 

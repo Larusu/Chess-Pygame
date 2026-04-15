@@ -1,6 +1,7 @@
 from pygame import Rect, draw, Surface, font, SRCALPHA, sprite
 from ..utils.utilities import get_font_path
 from ..engine.game_state import GameState
+from ..pieces.piece import Piece
 from .config import SQUARE_SIZE, OFFSET, BOARD_COLORS
 
 class BoardView:
@@ -19,9 +20,9 @@ class BoardView:
         self.font_size = 15
 
         # pygame vars
-        self.squares = [[None for _ in range(8)] for _ in range(8)]
+        self.squares = [[Rect() for _ in range(8)] for _ in range(8)]
         self.pieces = sprite.Group()
-        self.selected_piece = None  # for left click
+        self.selected_piece : Piece | None = None  # for left click
         self.highlight = None
         self.annotation = None      # for right click
         self.annotation_list = []   # to store the annotation
@@ -44,9 +45,10 @@ class BoardView:
         self.pieces = sprite.Group()
         for row in range(8):
             for col in range(8):
-                piece = self.board_state.get_board_by_position(row, col)
+                piece : Piece | None = \
+                        self.board_state.get_board_by_position(row, col)
                 
-                if piece is None: 
+                if piece is None:
                     continue
 
                 piece.set_position((self.squares[row][col].x,
@@ -153,6 +155,9 @@ class BoardView:
         # CASE 2: no piece selected yet or select another piece
         for piece in self.pieces:
             if piece.rect.collidepoint(mouse_pos):
+                if not (self.board_state.get_active_color() == piece.color):
+                    continue
+
                 self.board_state.set_selected_piece(piece)
                 self.selected_piece = piece
                 self.old_position = piece.rect.x, piece.rect.y
@@ -185,17 +190,19 @@ class BoardView:
             self.annotation_list.append(self.annotation)
 
     def handle_mouse_up(self):
+        if self.selected_piece is None:
+            return
+
         if self.drag:
             clicked_square = \
             self._get_square_by_pos(self.selected_piece.rect.center)
-            
+            self.drag = False
+
             if clicked_square is None:
                 self.selected_piece.set_position(self.old_position)  # snap back
-                self.drag = False
                 return
             
             self._handle_piece_movement(clicked_square)
-            self.drag = False
 
     def handle_dragging(self, position):
         if self.selected_piece:
@@ -203,15 +210,11 @@ class BoardView:
             self.drag = True
 
     def _handle_piece_movement(self, clicked_square):
+        if self.selected_piece is None:
+            return
+
         target_pos = self._get_coords_by_square(clicked_square)
-
-        print(target_pos)
-        print(self.available_moves)
-
-        if target_pos in self.available_moves:
-            self.board_state.move_piece(clicked_square.topleft)
-        else:
-            self.selected_piece.set_position(self.old_position)
+        self.board_state.move_piece(clicked_square.topleft, target_pos)
         self.selected_piece = None
         self.highlight = None
         self.available_moves = []
