@@ -1,3 +1,4 @@
+import pygame
 from .piece import Piece
 from ..utils.utilities import load_image
 
@@ -10,25 +11,25 @@ class Pawn(Piece):
         pass   
     
     def get_coordinates(self) -> list:
-        if self.move_count > 1:
-            if self.color == "white":
-                return [(0, -1), (1, -1), (-1, -1)]
-            elif self.color == "black":
-                return [(0, 1), (1, 1), (-1, 1)]
-        elif self.move_count <= 1:
+        # first turn
+        if self.move_count <= 1:
             if self.color == "white":
                 return [(0, -1), (1, -1), 
                         (-1, -1), (0, -2)]
-            elif self.color == "black":
+            else:
                 return [(0, 1), (1, 1),
                         (-1, 1), (0, 2)]
-        else: 
-            return []
+        # second, third, ...nth, turn
+        else:
+            if self.color == "white":
+                return [(0, -1), (1, -1), (-1, -1)]
+            else:
+                return [(0, 1), (1, 1), (-1, 1)]
 
     def available_takes(self):
         pass
 
-    def load_piece_image(self):
+    def load_piece_image(self) -> tuple[pygame.Surface, pygame.Rect]:
         if self.color == "white":
             return load_image("wP.png")
         else:

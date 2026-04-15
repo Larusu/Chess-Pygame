@@ -8,7 +8,8 @@ from ..pieces.king import King
 
 class Board:
     def __init__(self, fen_string):
-        self.board = [[None for _ in range(8)] for _ in range(8)]
+        self.board: list[list[Piece | None]] = \
+                [[None for _ in range(8)]for _ in range(8)]
         self._generate_placement(fen_string)
 
     def _assign_piece(self, row: str, rowCount: int):

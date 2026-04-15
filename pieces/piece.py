@@ -64,5 +64,5 @@ class Piece(pygame.sprite.Sprite, ABC):
         pass
         
     @abstractmethod
-    def load_piece_image(self):
+    def load_piece_image(self) -> tuple[pygame.Surface, pygame.Rect]:
         pass

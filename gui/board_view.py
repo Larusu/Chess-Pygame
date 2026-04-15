@@ -190,18 +190,13 @@ class BoardView:
             self.annotation_list.append(self.annotation)
 
     def handle_mouse_up(self):
-        if self.selected_piece is None:
+        piece = self.selected_piece
+
+        if piece is None:
             return
 
         if self.drag:
-            clicked_square = \
-            self._get_square_by_pos(self.selected_piece.rect.center)
-            self.drag = False
-
-            if clicked_square is None:
-                self.selected_piece.set_position(self.old_position)  # snap back
-                return
-            
+            clicked_square = self._get_square_by_pos(piece.rect.center)
             self._handle_piece_movement(clicked_square)
 
     def handle_dragging(self, position):
@@ -214,10 +209,21 @@ class BoardView:
             return
 
         target_pos = self._get_coords_by_square(clicked_square)
-        self.board_state.move_piece(clicked_square.topleft, target_pos)
+        valid_move = \
+                self.board_state.move_piece(clicked_square.topleft, target_pos)
+
+        # reset all state
         self.selected_piece = None
         self.highlight = None
         self.available_moves = []
+
+        if self.drag:
+            self.drag = False
+            return
+        
+        # if click another piece
+        if valid_move == "invalid":
+            self.handle_left_click(clicked_square.center)
    
     """
     HELPER FUNCTIONS

@@ -19,7 +19,7 @@ class GameState:
     # =======================
     # BOARD RELATED FUNCTIONS
     # =======================
-    def get_board_by_position(self, row, col) -> Piece:
+    def get_board_by_position(self, row, col) -> Piece | None:
         return self.board.get_piece_by_pos(row, col)
         
     # =======================
@@ -35,13 +35,13 @@ class GameState:
 
     def move_piece(self, new_position, coords):
         if self.selected_piece is None:
-            return
+            print("\033[31mNo selected piece!\033[0m")
+            return "invalid"
 
-        # if invalid
+        # if invalid move
         if coords not in self.valid_moves:
-            print("wrong position")
             self.selected_piece.set_position(self.old_position)
-            return
+            return "invalid"
         
         x_coord, y_coord = coords
         

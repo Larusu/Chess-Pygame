@@ -15,8 +15,14 @@
 - Special rule enforcement (check, checkmate, stalemate)
 - Board state (where is every piece?)
 #### `board.py`
-- this should handle the data structures
+- handles the 2d array
 - We will FEN / Forsyth-Edwards Notations
+#### `rules.py`
+- This is where all the rule happens
+- `checkmate`, `stalemate`, `is_in_check`, `en_passant`, `promotion`, `castling`, `etc`
+#### `game_state.py`
+- memory of the entire game
+- turn management, move history, board state reference (current piece position), game status (game over?)
 1. Piece Placement
 	- lowercase for black : prnbqk
 	- UPPERCASE for white : PRNBQK
@@ -41,7 +47,7 @@
 	- if cannot: the symbol used is `-`
 	- example: =="rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3"==
 5. Half-move Clock
-	- how many moves player has made since the last pawn advance or piece capture
+	- how many moves player has made since the last pawn advance or piece captureqz
 	- this is for the **50-move draw rule**
 	- if counter reach 100 (means both players reached 50 moves), the game ends in a draw
 	- example: =="8/5k2/3p4/1p1Pp2p/pP2Pp1P/P4P1K/8/8 b - - 99"==
@@ -50,10 +56,6 @@
 	- last field is to count the move of both player
 	- it is ONLY INCREMENTED if black moves
 	- example: =="5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b - - 1 32"==
-#### `rules.py`
-- This is where all the rule happens
-- `checkmate`, `stalemate`, `is_in_check`
-
 ### `gui/` 
 - The graphical interface that will show the player
 - The game loop
@@ -108,7 +110,6 @@ Same as Rook and Bishop
 ```
 chess/
 ├── assets/              # all the images and fonts for the game
-├── config/              # configurations
 ├── engine/              # core logic (no gui)
 │   ├── __init__.py
 │   ├── board.py         # handles data structure of the board
@@ -117,13 +118,14 @@ chess/
 ├── gui/
 │   ├── __init__.py
 │   ├── board_view.py    # board drawing and pieces
+│   ├── config.py        # custom configuration
 │   └── game.py          # game loop, event handling
 ├── pieces/
 │   ├── __init__.py
 │   ├── piece.py         # abstract base class
 │   ├── pawn.py
 │   ├── rook.py
-│   ├── knight.py
+│   ├── knight33.py
 │   ├── bishop.py
 │   ├── queen.py
 │   └── king.py
@@ -154,10 +156,11 @@ Finished at 4/9/2026;02:45
 Finished at 4/12/2026;21:00
 
 ## Phase 4 — Movement
-- [ ] Implement basic move logic per piece
-- [ ] Move a piece from one square to another
-- [ ] Implement capture logic
-- [ ] Implement turn system (white → black → white)
+- [x] Implement basic move logic per piece
+- [x] Move a piece from one square to another
+- [x] Implement capture logic
+- [x] Implement turn system (white → black → white)
+Finished at 4/15/2026;14:22
 
 ## Phase 5 — Special Rules
 - [ ] Pawn: en passant, promotion
