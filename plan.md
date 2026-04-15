@@ -75,7 +75,6 @@ Equation: (x, y ± 1 || 2)
 - If black: (x, y - 1) or (x, y - 2)
 Condition: (1 <= x <= 8,  1 <= y <= 8)
 ### Rook - R
-![[how-rook-move.png]]
 Equation: (x, y ± n) and (x ± n, y)
 - Top:    (x, y + n)
 - Right:  (x + n, y)
@@ -83,7 +82,6 @@ Equation: (x, y ± n) and (x ± n, y)
 - Left:   (x - n, y)
 Condition: (1 <= x <= 8,  1 <= y <= 8)
 ### Bishop - B
-![[how-bishop-move.png]]
 Equation: (x ± n, y ± n)
 - Top-right: (x + n, y + n)
 - Top-left:  (x - n, y + n)
@@ -91,7 +89,6 @@ Equation: (x ± n, y ± n)
 - Bot-left:  (x - n, y - n)
 Condition: (1 <= x <= 8,  1 <= y <= 8)
 ### Knight - N
-![[how-knight-move.png]]
 Equation: (x ± 2, y ± 1), (x ± 1, y ± 2)
 - Top-right:  (x + 1, y + 2)
 - Top-left:   (x - 1, y + 2)
