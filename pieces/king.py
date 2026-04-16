@@ -7,15 +7,9 @@ class King(Piece):
         super().__init__(color, x, y)
         self.max_step = 1
 
-    def update(self):
-        pass
-
     def get_coordinates(self) -> list:
         return [(1, 0), (-1, 0), (0, 1), (0, -1),
                 (1, 1), (1, -1), (-1, 1), (-1, -1)]
-
-    def available_takes(self):
-        pass
 
     def load_piece_image(self) -> tuple[pygame.Surface, pygame.Rect]:
         if self.color == "white":

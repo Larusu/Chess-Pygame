@@ -7,9 +7,6 @@ class Knight(Piece):
         super().__init__(color, x, y)
         self.max_step = 1
 
-    def update(self):
-        pass   
-    
     def get_coordinates(self) -> list:
         return [( 1,  2),
                 (-1,  2),
@@ -19,9 +16,6 @@ class Knight(Piece):
                 (-1, -2),
                 (-2,  1),
                 (-2, -1)]
-
-    def available_takes(self):
-        pass
 
     def load_piece_image(self) -> tuple[pygame.Surface, pygame.Rect]:
         if self.color == "white":

@@ -16,11 +16,9 @@ class Piece(pygame.sprite.Sprite, ABC):
        screen.blit(self.image, self.rect)
 
     def set_position(self, position):
+        if self.rect is None:
+            return
         self.rect.topleft = position
-    
-    @abstractmethod
-    def update(self):
-        pass
 
     def _handle_move_calculation(self, x, y) -> list:
         direction = []
@@ -65,10 +63,6 @@ class Piece(pygame.sprite.Sprite, ABC):
 
     def get_color(self):
         return self.color
-
-    @abstractmethod
-    def available_takes(self):
-        pass
         
     @abstractmethod
     def load_piece_image(self) -> tuple[pygame.Surface, pygame.Rect]:

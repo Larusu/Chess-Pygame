@@ -5,15 +5,9 @@ from ..utils.utilities import load_image
 class Bishop(Piece):
     def __init__(self, color, x, y):
         super().__init__(color, x, y)
-    
-    def update(self):
-        pass
 
     def get_coordinates(self) -> list:
         return [(1, 1), (1, -1), (-1, 1), (-1, -1)]
-
-    def available_takes(self):
-        pass
 
     def load_piece_image(self) -> tuple[pygame.Surface, pygame.Rect]:
         if self.color == "white":

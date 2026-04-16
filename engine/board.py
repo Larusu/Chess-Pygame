@@ -95,3 +95,6 @@ class Board:
 
     def get_piece_by_pos(self, row, col) -> Piece | None:
          return self.board[row][col]
+
+    def set_piece_at(self, row, col, piece):
+        self.board[row][col] = piece

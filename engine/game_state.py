@@ -3,7 +3,8 @@ from ..pieces.piece import Piece
 from ..pieces.pawn import Pawn
 from ..pieces.king import King
 from ..pieces.rook import Rook
-from .rules import get_valid_moves, get_enemy_at
+from .rules import get_valid_moves, get_enemy_at, is_en_passant_target, \
+algebraic_to_coords
 
 class GameState:
     def __init__(self):
@@ -31,8 +32,19 @@ class GameState:
     # PIECE RELATED FUNCTIONS
     # =======================
     def set_selected_piece(self, piece):
+        if piece is None:
+            print("\033[31mNo selected piece!\033[0m")
+            return
+
+        if isinstance(piece, Pawn):
+            self.valid_moves = get_valid_moves(piece, self.board, 
+                                               self.possible_en_passant)
+        elif isinstance(piece, King):
+            self.valid_moves = get_valid_moves(piece, self.board,
+                                               self.castling_rights)
+        else:
+            self.valid_moves = get_valid_moves(piece, self.board)
         self.selected_piece = piece
-        self.valid_moves = get_valid_moves(piece, self.board)
         self.old_rect_pos = (piece.rect.x, piece.rect.y)
         self.old_board_pos = (piece.file, piece.rank)
     
@@ -50,9 +62,13 @@ class GameState:
             return "invalid"
         
         x_coord, y_coord = coords
-        
+
         enemy_piece = get_enemy_at(self.selected_piece, self.board, 
-                                    y_coord, x_coord)
+                                y_coord, x_coord, self.possible_en_passant)
+
+        if is_en_passant_target(y_coord, x_coord, self.possible_en_passant):
+            x_pos, y_pos = algebraic_to_coords(self.possible_en_passant)
+            self.board.set_piece_at(y_pos, x_pos, None)
 
         if enemy_piece is not None:
             enemy_piece.kill() # remove from sprites
@@ -62,6 +78,7 @@ class GameState:
         self.selected_piece.move(new_position, x_coord, y_coord)
         
         self._update_fen_after_move()
+        print(f"{self.fen_str}")
 
         self.selected_piece = None
         self.old_rect_pos = ()
@@ -113,11 +130,13 @@ class GameState:
         # handle en passant and 50-move rule
         if isinstance(piece, Pawn):
             self.half_move = 0
-
             if abs(self.selected_piece.rank - self.old_board_pos[1]) == 2:
                 self.possible_en_passant = self._to_algebraic(piece)
+            else:
+                self.possible_en_passant = "-"
         else:
             self.half_move = int(self.half_move) + 1
+            self.possible_en_passant = "-"
 
         # check for possible castle
         if isinstance(piece, King):
@@ -147,16 +166,12 @@ class GameState:
 
     def _to_algebraic(self, piece: Piece) -> str:
         file, rank = piece.get_board_position()
+        old_rank = self.old_board_pos[1]
         
-        file_map = {
-            0: "a", 1: "b", 2: "c", 3: "d",
-            4: "e", 5: "f", 6: "g", 7: "h",
-        }
-        rank_number = 8 - rank
+        file_map = "abcdefgh"
+        
+        if (isinstance(piece, Pawn) and abs(old_rank - rank) == 2): 
+            middle = (old_rank + rank) // 2 # floor division
+            return f"{file_map[file]}{8 - middle}"
 
-        if piece.get_color() == "white":
-            return f"{file_map[file]}{rank_number}"
-        elif piece.get_color() == "black":
-            return f"{file_map[file]}{rank_number}"
-        else:
-            return "-"
+        return f"{file_map[file]}{8 - rank}"
