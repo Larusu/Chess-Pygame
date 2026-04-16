@@ -1,4 +1,5 @@
 from ..pieces.pawn import Pawn
+from ..pieces.king import King
 from ..pieces.piece import Piece
 from .board import Board
 
@@ -24,23 +25,29 @@ def get_valid_moves(piece: Piece, board: Board, fen_str: str = "") -> list:
                 break
     
     if isinstance(piece, Pawn):
-        possible_takes = piece.available_takes()
-        for col, row in possible_takes:
-            target_piece = board.get_piece_by_pos(row, col)
+        _handle_pawn_move(piece, board, legal_moves, fen_str) 
 
-            if target_piece is None:
-                continue
-            elif _is_enemy(piece.get_color(), target_piece.get_color()):
-                legal_moves.append((col, row))
-
-        en_passant_move = _get_en_passant_move(piece, fen_str)
-        if en_passant_move is not None:
-            legal_moves.append(en_passant_move)
+    if isinstance(piece, King):
+        _handle_king_move(piece, board, legal_moves, fen_str)
 
     return legal_moves
 
 def _is_enemy(own_color, other_color):
     return own_color != other_color
+
+def _handle_pawn_move(piece: Pawn, board: Board, legal_moves: list, fen_str):
+    possible_takes = piece.available_takes()
+    for col, row in possible_takes:
+        target_piece = board.get_piece_by_pos(row, col)
+
+        if target_piece is None:
+            continue
+        elif _is_enemy(piece.get_color(), target_piece.get_color()):
+            legal_moves.append((col, row))
+
+    en_passant_move = _get_en_passant_move(piece, fen_str)
+    if en_passant_move is not None:
+        legal_moves.append(en_passant_move)
 
 def _get_en_passant_move(piece: Pawn, fen_str: str) -> tuple | None:
     if fen_str == "-":
@@ -53,6 +60,32 @@ def _get_en_passant_move(piece: Pawn, fen_str: str) -> tuple | None:
         else target_pos[1] == own_pos[1] + 1
     )
     return target_pos if correct_file and correct_rank else None
+
+def _handle_king_move(king: King, board: Board, legal_moves: list, fen_str):
+    file, rank = king.get_board_position()
+    right_side = True
+    left_side = True
+    # for right side
+    for col in range(1, 7):
+        piece = board.get_piece_by_pos(rank, col)
+        
+        if piece is not None and col < file:
+            left_side = False
+            continue
+        if piece is not None and col > file:
+            right_side = False
+            continue
+    
+    if right_side:
+        if "K" in fen_str and king.get_color() == "white":
+            legal_moves.append(king.get_castling_move("right"))
+        elif "k" in fen_str and king.get_color() == "black":
+            legal_moves.append(king.get_castling_move("right"))
+    if left_side:
+        if "Q" in fen_str and king.get_color() == "white":
+            legal_moves.append(king.get_castling_move("left"))
+        elif "q" in fen_str and king.get_color() == "black":
+            legal_moves.append(king.get_castling_move("left"))
 
 def get_enemy_at(piece: Piece, board: Board, target_row, target_col,
                  en_passant = "-") -> Piece | None:
@@ -80,6 +113,17 @@ def is_en_passant_target(target_row, target_col, en_passant = "-") -> bool:
     en_passant_pos = algebraic_to_coords(en_passant)
 
     return (target_col, target_row) == en_passant_pos 
+
+def get_castle_move(piece: Piece, board: Board, old_file):
+    if not isinstance(piece, King):
+        return None
+    file, rank = piece.get_board_position()
+    
+    if (file - old_file) == 2:
+        return board.get_piece_by_pos(rank, old_file + 3)
+    elif (file - old_file) == -2:
+        return board.get_piece_by_pos(rank, old_file - 4)
+    return None 
 
 def algebraic_to_coords(notation: str) -> tuple[int, int]:
     file = notation[0]

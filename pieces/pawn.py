@@ -5,21 +5,13 @@ from ..utils.utilities import load_image
 class Pawn(Piece):
     def __init__(self, color, x, y):
         super().__init__(color, x, y)
-        self.max_step = 1
+        self.max_step = 2
     
     def get_coordinates(self) -> list:
-        # first move
-        if not self.has_move():
-            if self.color == "white":
-                return [(0, -1), (0, -2)]
-            else:
-                return [(0, 1), (0, 2)]
-        # second, third, ...nth, move
+        if self.color == "white":
+            return [(0, -1)]
         else:
-            if self.color == "white":
-                return [(0, -1)]
-            else:
-                return [(0, 1)]
+            return [(0, 1)]
 
     def available_takes(self) -> list:
         takes = []
@@ -41,6 +33,11 @@ class Pawn(Piece):
 
         return takes
 
+    def move(self, new_position, new_file, new_rank):
+        self.set_position(new_position)
+        self.move_count += 1
+        self.file, self.rank = new_file, new_rank
+        self.max_step = 1 # move 1 square after moving
 
     def load_piece_image(self) -> tuple[pygame.Surface, pygame.Rect]:
         if self.color == "white":

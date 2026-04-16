@@ -4,7 +4,7 @@ from ..pieces.pawn import Pawn
 from ..pieces.king import King
 from ..pieces.rook import Rook
 from .rules import get_valid_moves, get_enemy_at, is_en_passant_target, \
-algebraic_to_coords
+algebraic_to_coords, get_castle_move
 
 class GameState:
     def __init__(self):
@@ -62,23 +62,39 @@ class GameState:
             return "invalid"
         
         x_coord, y_coord = coords
-
+        old_x, old_y = self.old_board_pos
+        
+        # handle captures
         enemy_piece = get_enemy_at(self.selected_piece, self.board, 
                                 y_coord, x_coord, self.possible_en_passant)
 
         if is_en_passant_target(y_coord, x_coord, self.possible_en_passant):
             x_pos, y_pos = algebraic_to_coords(self.possible_en_passant)
             self.board.set_piece_at(y_pos, x_pos, None)
-
+        
         if enemy_piece is not None:
             enemy_piece.kill() # remove from sprites
-
+        
         # set new position
         self.board.update_board(self.selected_piece, y_coord, x_coord)
         self.selected_piece.move(new_position, x_coord, y_coord)
-        
+       
+        # handle castling
+        castled_rook = get_castle_move(self.selected_piece, self.board, old_x)
+
+        if castled_rook is not None:
+            rook_x, rook_y = castled_rook.get_board_position()
+            
+            # castle queen side
+            if rook_x + rook_y < old_x + old_y:
+                self.board.update_board(castled_rook, rook_y, x_coord + 1)
+                castled_rook.move("queen", x_coord + 1, rook_y)
+            # castle king side
+            else:
+                self.board.update_board(castled_rook, rook_y, x_coord - 1)
+                castled_rook.move("king", x_coord - 1, rook_y)
+
         self._update_fen_after_move()
-        print(f"{self.fen_str}")
 
         self.selected_piece = None
         self.old_rect_pos = ()
