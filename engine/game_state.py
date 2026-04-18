@@ -73,6 +73,8 @@ class GameState:
             self.board.set_piece_at(y_pos, x_pos, None)
         
         if enemy_piece is not None:
+            if isinstance(enemy_piece, Rook):
+                self._rook_castling_rights(enemy_piece)
             enemy_piece.kill() # remove from sprites
         
         # set new position
@@ -163,15 +165,7 @@ class GameState:
                 self.castling_rights = castling_fen.replace("kq", "")
 
         if isinstance(piece, Rook):
-            castling_fen = self.castling_rights
-            if self.old_board_pos == (7, 0):
-                self.castling_rights = castling_fen.replace("Q", "")
-            elif self.old_board_pos == (7, 7):
-                self.castling_rights = castling_fen.replace("K", "")
-            elif self.old_board_pos == (0, 7):
-                self.castling_rights = castling_fen.replace("k", "")
-            elif self.old_board_pos == (0, 0):
-                self.castling_rights = castling_fen.replace("q", "")
+            self._rook_castling_rights()
 
         if len(self.castling_rights) == 0:
             self.castling_rights = "-"
@@ -179,6 +173,18 @@ class GameState:
         self.fen_str = piece_placement + " " + self.active_color + " "
         self.fen_str += self.castling_rights + " " + self.possible_en_passant
         self.fen_str += " " + str(self.half_move) + " " + str(self.full_move)
+
+    def _rook_castling_rights(self, rook: Rook | None = None):
+        old_position = (0, 0)
+        if rook is None:
+            old_position = self.old_board_pos
+        else: 
+            old_position = rook.get_board_position()
+
+        castling_fen = self.castling_rights
+
+        rook_map = { (0, 7): "Q", (0, 0): "q", (7, 7): "K", (7, 0): "k", }
+        self.castling_rights = castling_fen.replace(rook_map[old_position], "")
 
     def _to_algebraic(self, piece: Piece) -> str:
         file, rank = piece.get_board_position()
