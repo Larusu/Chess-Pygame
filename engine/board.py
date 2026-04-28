@@ -89,7 +89,6 @@ class Board:
 
     def update_board(self, piece: Piece, target_row: int, target_col: int):
         old_row, old_col = piece.rank, piece.file
-        
         self.board[old_row][old_col] = None
         self.board[target_row][target_col] = piece
 
@@ -98,3 +97,11 @@ class Board:
 
     def set_piece_at(self, row, col, piece):
         self.board[row][col] = piece
+
+    def get_all_pieces(self) -> list[Piece]:
+        pieces = []
+        for row in range(8):
+            for col in range(8):
+                if self.board[row][col] is not None:
+                    pieces.append(self.board[row][col])
+        return pieces

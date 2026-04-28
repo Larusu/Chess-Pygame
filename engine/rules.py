@@ -87,6 +87,35 @@ def _handle_king_move(king: King, board: Board, legal_moves: list, fen_str):
         elif "q" in fen_str and king.get_color() == "black":
             legal_moves.append(king.get_castling_move("left"))
 
+def get_piece_valid_takes(piece: Piece, board: Board, en_passant: str):
+    takes = []
+
+    if isinstance(piece, Pawn):
+        possible_takes = piece.available_takes()
+        for col, row in possible_takes:
+            target_piece = board.get_piece_by_pos(row, col)
+
+            if target_piece is None:
+                takes.append((col, row))
+
+        en_passant_move = _get_en_passant_move(piece, en_passant)
+        if en_passant_move is not None:
+            takes.append(en_passant_move)
+
+        return takes
+
+    move_paths = piece.generate_possible_moves()
+
+    for direction_paths in move_paths:
+        for col, row in direction_paths:
+            target_piece = board.get_piece_by_pos(row, col)
+            if target_piece is None:
+                takes.append((col, row))
+            else:
+                break
+
+    return takes
+    
 def get_enemy_at(piece: Piece, board: Board, target_row, target_col,
                  en_passant = "-") -> Piece | None:
     target_piece = board.get_piece_by_pos(target_row, target_col)

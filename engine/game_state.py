@@ -4,7 +4,7 @@ from ..pieces.pawn import Pawn
 from ..pieces.king import King
 from ..pieces.rook import Rook
 from .rules import get_valid_moves, get_enemy_at, is_en_passant_target, \
-algebraic_to_coords, get_castle_move
+algebraic_to_coords, get_castle_move, get_piece_valid_takes
 
 class GameState:
     def __init__(self):
@@ -40,8 +40,9 @@ class GameState:
             self.valid_moves = get_valid_moves(piece, self.board, 
                                                self.possible_en_passant)
         elif isinstance(piece, King):
-            self.valid_moves = get_valid_moves(piece, self.board,
-                                               self.castling_rights)
+            valid_moves = get_valid_moves(piece, self.board, self.castling_rights)
+            self.valid_moves = [moves for moves in valid_moves
+                                if moves not in self._all_attacking(piece)]
         else:
             self.valid_moves = get_valid_moves(piece, self.board)
         self.selected_piece = piece
@@ -197,3 +198,15 @@ class GameState:
             return f"{file_map[file]}{8 - middle}"
 
         return f"{file_map[file]}{8 - rank}"
+
+    def _all_attacking(self, piece: Piece) -> list:
+        all_pieces = self.board.get_all_pieces()
+        squares = set()
+
+        for target in all_pieces:
+            if target.get_color() != piece.get_color():
+                target_takes = get_piece_valid_takes(target, self.board, 
+                                                     self.possible_en_passant)
+                squares.update(target_takes)
+
+        return list(squares)
